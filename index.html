@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UUID v7 Generator</title>
+  <style>
+      * {
+          margin: 0;
+          padding: 0;
+          box-sizing: border-box;
+      }
+
+      body {
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          min-height: 100vh;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding: 20px;
+      }
+
+      .container {
+          background: white;
+          border-radius: 20px;
+          padding: 40px;
+          box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+          max-width: 800px;
+          width: 100%;
+      }
+
+      h1 {
+          color: #333;
+          margin-bottom: 30px;
+          text-align: center;
+          font-size: 2.5em;
+      }
+
+      .controls {
+          display: flex;
+          gap: 15px;
+          margin-bottom: 30px;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: center;
+      }
+
+      .input-group {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+      }
+
+      label {
+          color: #666;
+          font-weight: 500;
+      }
+
+      input[type="number"] {
+          padding: 10px 15px;
+          border: 2px solid #e0e0e0;
+          border-radius: 8px;
+          font-size: 16px;
+          width: 80px;
+          transition: border-color 0.3s;
+      }
+
+      input[type="datetime-local"] {
+          padding: 10px 15px;
+          border: 2px solid #e0e0e0;
+          border-radius: 8px;
+          font-size: 16px;
+          transition: border-color 0.3s;
+          font-family: inherit;
+      }
+
+      input[type="number"]:focus,
+      input[type="datetime-local"]:focus {
+          outline: none;
+          border-color: #667eea;
+      }
+
+      .btn-generate, .btn-now {
+          padding: 12px 30px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+          transition: transform 0.2s, box-shadow 0.2s;
+      }
+
+      .btn-now {
+          padding: 12px 20px;
+          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      }
+
+      .btn-generate:hover, .btn-now:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-generate:active, .btn-now:active {
+          transform: translateY(0);
+      }
+
+      .uuid-list {
+          display: flex;
+          flex-direction: column;
+          gap: 15px;
+      }
+
+      .uuid-item {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+          padding: 15px;
+          background: #f8f9fa;
+          border-radius: 10px;
+          transition: background-color 0.3s;
+      }
+
+      .uuid-item:hover {
+          background: #f0f2f5;
+      }
+
+      .uuid-text {
+          flex: 1;
+          font-family: 'Courier New', monospace;
+          font-size: 14px;
+          color: #333;
+          word-break: break-all;
+      }
+
+      .uuid-meta {
+          font-size: 11px;
+          color: #999;
+          margin-top: 5px;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+
+      .btn-copy {
+          padding: 8px 20px;
+          background: #28a745;
+          color: white;
+          border: none;
+          border-radius: 6px;
+          font-size: 14px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+          min-width: 80px;
+      }
+
+      .btn-copy:hover {
+          background: #218838;
+      }
+
+      .btn-copy.copied {
+          background: #6c757d;
+          cursor: default;
+      }
+
+      .info {
+          margin-top: 20px;
+          padding: 15px;
+          background: #f0f8ff;
+          border-radius: 10px;
+          font-size: 12px;
+          color: #666;
+          text-align: center;
+      }
+
+      .datetime-group {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          flex-wrap: wrap;
+      }
+
+      @media (max-width: 600px) {
+          .container {
+              padding: 30px 20px;
+          }
+
+          h1 {
+              font-size: 2em;
+          }
+
+          .controls {
+              flex-direction: column;
+          }
+
+          .datetime-group {
+              flex-direction: column;
+              width: 100%;
+          }
+
+          .datetime-group input {
+              width: 100%;
+          }
+
+          .uuid-text {
+              font-size: 12px;
+          }
+      }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>UUID v7 Generator</h1>
+
+  <div class="controls">
+    <div class="input-group">
+      <label for="amount">Amount:</label>
+      <input type="number" id="amount" min="1" max="100" value="5">
+    </div>
+
+    <div class="datetime-group">
+      <label for="datetime">Timestamp:</label>
+      <input type="datetime-local" id="datetime" step="0.001">
+      <button class="btn-now" onclick="setDateTimeToNow()">Now</button>
+    </div>
+
+    <button class="btn-generate" onclick="generateUUIDs()">Regenerate</button>
+  </div>
+
+  <div class="uuid-list" id="uuidList"></div>
+
+  <div class="info">
+    RFC 9562 compliant UUID v7 with monotonic sequence counter for guaranteed uniqueness<br>
+    Set a custom timestamp to generate UUIDs for any point in time
+  </div>
+</div>
+
+<script>
+    // Improved UUID v7 Generator - RFC 9562 compliant with monotonic sequence
+    let __lastTsMs = 0n;
+    let __seq12 = 0;
+
+    function generateUUIDv7(customTimestamp = null) {
+        const b = new Uint8Array(16);
+
+        // Use custom timestamp if provided, otherwise use current time
+        const now = customTimestamp !== null ? BigInt(customTimestamp) : BigInt(Date.now());
+
+        // Increment sequence if same millisecond, reset if time advanced
+        if (now === __lastTsMs) {
+            __seq12 = (__seq12 + 1) & 0x0fff; // wrap at 12 bits
+        } else {
+            __seq12 = 0;
+            __lastTsMs = now;
+        }
+
+        // 48-bit timestamp, big-endian
+        b[0] = Number((now >> 40n) & 0xffn);
+        b[1] = Number((now >> 32n) & 0xffn);
+        b[2] = Number((now >> 24n) & 0xffn);
+        b[3] = Number((now >> 16n) & 0xffn);
+        b[4] = Number((now >>  8n) & 0xffn);
+        b[5] = Number(now & 0xffn);
+
+        // Generate random bytes for rand_b
+        const rnd = new Uint8Array(10);
+        crypto.getRandomValues(rnd);
+
+        // Use sequence for rand_a's 12 bits (ensures uniqueness within same ms)
+        const randA = __seq12;
+        // Alternative with mixed randomness:
+        // const randA = (((rnd[0]<<8)|rnd[1]) & 0x0fff) ^ __seq12;
+
+        // Version 7 (0111) + rand_a
+        b[6] = 0x70 | (randA >> 8);
+        b[7] = randA & 0xff;
+
+        // Variant (10) + rand_b
+        b[8]  = (rnd[2] & 0x3f) | 0x80;
+        b[9]  = rnd[3];
+        b[10] = rnd[4];
+        b[11] = rnd[5];
+        b[12] = rnd[6];
+        b[13] = rnd[7];
+        b[14] = rnd[8];
+        b[15] = rnd[9];
+
+        // Format as 8-4-4-4-12 hex string
+        const hex = [...b].map(x => x.toString(16).padStart(2, '0'));
+        return (
+            hex.slice(0, 4).join('') + '-' +
+            hex.slice(4, 6).join('') + '-' +
+            hex.slice(6, 8).join('') + '-' +
+            hex.slice(8,10).join('') + '-' +
+            hex.slice(10).join('')
+        );
+    }
+
+    function extractTimestampFromUUIDv7(uuid) {
+        // Remove dashes and get first 12 hex chars (48 bits)
+        const hex = uuid.replace(/-/g, '').substring(0, 12);
+        const timestamp = parseInt(hex, 16);
+        return new Date(timestamp);
+    }
+
+    function formatDateTimeLocal(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        const milliseconds = String(date.getMilliseconds()).padStart(3, '0');
+
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}`;
+    }
+
+    function setDateTimeToNow() {
+        const now = new Date();
+        const datetimeInput = document.getElementById('datetime');
+        datetimeInput.value = formatDateTimeLocal(now);
+    }
+
+    function copyToClipboard(text, button) {
+        navigator.clipboard.writeText(text).then(() => {
+            const originalText = button.textContent;
+            button.textContent = 'Copied!';
+            button.classList.add('copied');
+
+            setTimeout(() => {
+                button.textContent = originalText;
+                button.classList.remove('copied');
+            }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy:', err);
+        });
+    }
+
+    function generateUUIDs() {
+        const amountInput = document.getElementById('amount');
+        const datetimeInput = document.getElementById('datetime');
+
+        let amount = parseInt(amountInput.value) || 5;
+
+        // Validate amount
+        if (amount < 1) amount = 1;
+        if (amount > 100) amount = 100;
+        amountInput.value = amount;
+
+        // Get custom timestamp if set
+        let customTimestamp = null;
+        if (datetimeInput.value) {
+            customTimestamp = new Date(datetimeInput.value).getTime();
+        }
+
+        const uuidList = document.getElementById('uuidList');
+        uuidList.innerHTML = '';
+
+        for (let i = 0; i < amount; i++) {
+            const uuid = generateUUIDv7(customTimestamp);
+            const timestamp = extractTimestampFromUUIDv7(uuid);
+
+            const uuidItem = document.createElement('div');
+            uuidItem.className = 'uuid-item';
+
+            const uuidContent = document.createElement('div');
+            uuidContent.style.flex = '1';
+
+            const uuidText = document.createElement('div');
+            uuidText.className = 'uuid-text';
+            uuidText.textContent = uuid;
+
+            const uuidMeta = document.createElement('div');
+            uuidMeta.className = 'uuid-meta';
+            uuidMeta.textContent = `Timestamp: ${timestamp.toISOString()} (${timestamp.getTime()}ms)`;
+
+            uuidContent.appendChild(uuidText);
+            uuidContent.appendChild(uuidMeta);
+
+            const copyButton = document.createElement('button');
+            copyButton.className = 'btn-copy';
+            copyButton.textContent = 'Copy';
+            copyButton.onclick = () => copyToClipboard(uuid, copyButton);
+
+            uuidItem.appendChild(uuidContent);
+            uuidItem.appendChild(copyButton);
+            uuidList.appendChild(uuidItem);
+        }
+    }
+
+    // Initialize datetime to now on page load
+    window.addEventListener('DOMContentLoaded', () => {
+        setDateTimeToNow();
+        generateUUIDs();
+    });
+
+    // Handle Enter key in inputs
+    document.getElementById('amount').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            generateUUIDs();
+        }
+    });
+
+    document.getElementById('datetime').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            generateUUIDs();
+        }
+    });
+</script>
+</body>
+</html>
